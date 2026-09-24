@@ -1,0 +1,1677 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  <title>My nova</title>
+
+  <meta name="description" content="Galaxia">
+  <meta property="og:title" content="My nova">
+  <meta property="og:description" content="Galaxia">
+  <meta property="og:image" content="og-cover.png">
+
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <style>
+    /* ===== PANTALLA DE CONTRASEÑA ===== */
+
+#passwordScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.password-card {
+  position: relative;
+  width: min(360px, 90vw);
+  padding: 30px 24px;
+  text-align: center;
+  border-radius: 20px;
+  background: rgba(20, 10, 35, 0.92);
+  color: white;
+  overflow: hidden;
+}
+
+/* Borde neón animado */
+.password-card::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 22px;
+  background: conic-gradient(
+    from 0deg,
+    #7b2cff,
+    #d66cff,
+    #5f00ff,
+    #b000ff,
+    #7b2cff
+  );
+  animation: neonBorder 3s linear infinite;
+  z-index: -2;
+}
+
+.password-card::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 18px;
+  background: rgba(15, 7, 28, 0.98);
+  z-index: -1;
+}
+
+@keyframes neonBorder {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.password-card h2 {
+  margin: 0 0 10px;
+  color: #fff;
+  text-shadow:
+    0 0 8px #9d4dff,
+    0 0 20px #7b2cff;
+}
+
+.password-card p {
+  color: #d9c7ff;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+#passwordInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(180, 100, 255, .5);
+  outline: none;
+  background: rgba(0, 0, 0, .45);
+  color: white;
+  text-align: center;
+  font-size: 15px;
+}
+
+#passwordInput:focus {
+  border-color: #b56cff;
+  box-shadow: 0 0 15px rgba(155, 70, 255, .5);
+}
+
+#enterPassword {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #6f20ff, #a94dff);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 0 15px rgba(130, 50, 255, .6);
+}
+
+#passwordMessage {
+  min-height: 20px;
+  margin-top: 15px;
+  color: #ff9ee9;
+  font-size: 13px;
+  transition: .2s;
+}
+    html,body{
+      margin:0;
+      height:100%;
+      background:#000;
+      overflow:hidden;
+    }
+
+    #galaxy-canvas{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      touch-action:none;
+    }
+
+    .attribution{
+      position:fixed;
+      left:10px;
+      bottom:10px;
+      font-size:11px;
+      color:#b9a0ff;
+      opacity:.8;
+      background:rgba(0,0,0,.35);
+      padding:6px 8px;
+      border-radius:8px;
+      z-index:5;
+    }
+
+    /* ===== SPOTIFY ===== */
+    .player{
+      position:fixed;
+      left:10px;
+      right:10px;
+      bottom:10px;
+
+      background:rgba(20,15,35,.45);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;
+
+      padding:8px;
+
+      backdrop-filter:blur(6px);
+      -webkit-backdrop-filter:blur(6px);
+
+      color:#fff;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Helvetica,
+        Arial;
+
+      z-index:10;
+    }
+
+    .player iframe{
+      display:block;
+      width:100%;
+      height:352px;
+      border:0;
+      border-radius:10px;
+    }
+
+    .pill{
+      position:fixed;
+      top:10px;
+      left:50%;
+      transform:translateX(-50%);
+
+      padding:6px 12px;
+      border-radius:700px;
+
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.18);
+
+      color:#fff;
+
+      font:
+        12px
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Helvetica,
+        Arial;
+
+      z-index:5;
+    }
+
+    .error{
+      position:fixed;
+      inset:auto 10px 70px 10px;
+
+      background:#260015;
+      color:#ffd9f7;
+
+      border:1px solid #ff8ae5;
+      border-radius:10px;
+
+      padding:10px;
+
+      font:12px system-ui;
+
+      display:none;
+      z-index:20;
+    }
+
+    /* En celulares hacemos el Spotify un poco más pequeño */
+    @media (max-width:600px){
+      .player{
+        left:6px;
+        right:6px;
+        bottom:6px;
+        padding:5px;
+      }
+
+      .player iframe{
+        height:152px;
+      }
+
+      .pill{
+        max-width: 85%;
+        width: max-content;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+      }
+
+      .attribution{
+        display:none;
+      }
+    }
+  </style>
+
+  <!-- Three.js legacy non-module build + OrbitControls -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+<body>
+
+<!-- ===== PANTALLA DE CONTRASEÑA ===== -->
+<div id="passwordScreen">
+
+  <div class="password-card">
+
+    <h2>✦ Bienvenido ✦</h2>
+
+    <p id="passwordText">
+      Introduce la contraseña, recuerda que cada vez que adivines algo pide una pista.
+    </p>
+
+    <input
+      type="password"
+      id="passwordInput"
+      placeholder="Contraseña"
+      autocomplete="off"
+    >
+
+    <button id="enterPassword">
+      Entrar ✦
+    </button>
+
+    <div id="passwordMessage"></div>
+
+  </div>
+
+</div>
+
+<!-- ===== GALAXIA ===== -->
+<canvas id="galaxy-canvas"></canvas>
+
+<div class="pill">
+   Qué las velas sean infinitas y el pastel sea tu favorito, que cada que mires el reloj, tu sonrisa ilumine el momento 💫ℎ𝑎𝑝𝑝𝑦 𝑏𝑖𝑟𝑡ℎ𝑑𝑎𝑦 𝑚𝑦 𝑛𝑜𝑣𝑎💫
+</div>
+
+<div class="attribution">
+  Base: tlanex · Adaptación para Jotab 💫
+</div>
+
+<div id="err" class="error"></div>
+
+
+<!-- =====================================================
+     SPOTIFY PLAYLIST
+     Playlist:
+     https://open.spotify.com/playlist/5mbdnR10EeyaDtGP4FGcIx
+     ===================================================== -->
+
+<div class="player">
+
+  <iframe
+    src="https://open.spotify.com/embed/playlist/5mbdnR10EeyaDtGP4FGcIx?utm_source=generator"
+    width="100%"
+    height="352"
+    frameborder="0"
+    allowfullscreen=""
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+    loading="lazy">
+  </iframe>
+
+</div>
+
+
+<!-- Efectos de corazones -->
+<canvas
+  id="fx"
+  style="position:fixed;inset:0;pointer-events:none;z-index:4;">
+</canvas>
+
+
+<script>
+(function(){
+
+const err = document.getElementById('err');
+
+function showError(msg){
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+// ====== CONTRASEÑA ======
+
+const PASSWORD = "Victoryjayce";
+
+const passwordScreen = document.getElementById("passwordScreen");
+const passwordInput = document.getElementById("passwordInput");
+const enterPassword = document.getElementById("enterPassword");
+const passwordMessage = document.getElementById("passwordMessage");
+const passwordText = document.getElementById("passwordText");
+
+const wrongMessages = [
+  "Acceso denegado... El amor es algo muy hermoso cuando lo encuentras. El mundo entero sabe a sueños de narcisos 🌼✨, así que debes aferrarte al amor y jamás soltarlo. No cometas los mismos errores que yo, ¿entiendes? 🥀❤️.",
+ "¿y si funamos a leo san juan?", 
+ "A si que corre, corre, corre corazón", 
+ "bebe definitivamente eres un Aston martín", 
+  "Esa no es la contraseña, Yo pienso en ti todo el día 💭☀️ y cuando no estoy contigo solo pienso en estar contigo ⏳❤️, y cuando estás conmigo me siento en paz con todo el mundo 🕊️✨ y sé que ya nunca le pediré a Dios nada 🙏🥺 porque mientras estés tú en mi vida tengo todo lo que siempre quise 💖👑, y lo único que quiero hacer es pasar el resto de mi vida haciéndote feliz como tú me haces feliz 💍🥹💖.",
+  "las damas primero, no primero los mayores, el golpe avisa.... ¿quien avisa? (lo golpea)", 
+  "Casi... ​Lucharé en su nombre, pero le pido un favor ⚔️🛡️. Quiero que proteja la vida de mi esposa 💍🕊️. Si le sucede algo, no podría seguir 💔🥀. Todo perdería sentido. La vida sería insoportable 😞🌧️. El Señor te dio la vida ✝️✨. Debes honrarlo y servirle 🙏👑.", 
+   "No puedo creer que me tengas toda la noche preocupado por ti... ¿Toda la noche?, mi amor son las 8 de la noche", 
+    "mi amor no nos hemos comunicado, (se duerme)... Marcus, dime si oíste lo que dije, aver repite lo que dije ", 
+  "¡Feliz cumpleaños! Por fin lograste resolver la clave. Y si es así, ¿por qué sigues aquí? Jajajajajajajaja. Suerte en el próximo intento.", 
+  "¿y si funamos a leo san juan?", 
+  "La estrellas dice que esa contraseña no es correcta.💫 Las luces, las noches que fuimos de bares 🌃🍸🍻, la vez que peleamos y perdiste las llaves 🗝️⚡💔, se extraña todo lo que fue tenerte 🥺🌧️. ",
+   "y si la clave es el mensaje oculto de aqui:01010100 01000101 00100000 01000001 01001101 01001111", 
+  "Hmm... intenta recordar la contraseña quizás te pueda ayudar ​la ley de Murphy no significa que algo malo vaya a pasar ⚙️⚠️; significa que si algo puede pasar, va a pasar 🌌🎲, y eso nos sonó bien a los dos 🤝✨🌙",
+   "NOTHING JUST AN INCHIDENT", 
+  "¡Soy más que rápido, más que veloz, soy un rayo! ⚡🏎️💨 ¿Estás listo para volver a intentarlo? 🏁🔥🏆 no reconocen esa contraseña. ⭐",
+  "Simply lovely", 
+   "I am stupid", 
+  "Acceso bloqueado. Inténtalo nuevamente con se pierde toda la semana 🗓️🕵️‍♂️ y de repente aparece en medio de la nada 🌵✨ ", 
+ "¡Esa clave no era, y acabas de romper el corazón del sistema! 💔 En todas las líneas del tiempo ⌛🌀, en todas las posibilidades, solo tú puedes hacer que lo entienda 💡💖.",
+  "what would you describe you two as like as a pair?... Mmm,team mates... Outside of racing, dumb and dumber", 
+ "Esa contraseña pertenecía a otra vida. Inténtalo de nuevo, reina. 🥀... ​Y no te ofendas, pero te equivocas en que estamos en caminos separados 🛑🛤️; no son caminos separados, tú eres mi camino 🗺️❤️... Y siempre vas a ser mi camino 👣💍.", 
+ "y si intentas con nombres de escuderías o pilotos?",
+ "Ni con el poder del amor y todas las líneas del tiempo vas a entrar con esa clave. ⌛🌀 Jajaja quizás con ​Boy, I'm so happy, we have been Heaven-blessed ☁️✨, I can't believe what God has done 🙏, through us, He's given life to one 💖, but isn't she lovely, made from love? 🎶❤️", 
+"​🏎️ ¡Demasiado rápido pero en la dirección equivocada!... You can be all I got, what's the difference? 🤷‍♂️❤️ You and me and a lot of bad decisions 🍾🚗💥 All I know, all I know 🎵✨", 
+"¡Habla, hijo de la Gran Muralla! Habla, aunque sea en mandarín (habla en chino). ¿Qué rayos dijo?... Creo que está hablando en francés; francés, ¿pues qué clase de chino es?",
+"Lando, we can be world champion I said.Please Lando",
+"Tu deseo ha sido escuchado fuerte y claro", 
+"El es yo, y yo soy tu",
+"A partir de este momento llevarás el nombre de... tiburoncin ua ja..",
+"Agente, revise sus notas, esa clave no supera el control de seguridad. 🕶️... ​Si no sabes el significado de tu vida, entonces hazme ese significado 🌟💔 y úsame como la razón para vivir 🫂❤️🔥.", 
+"TODOS TRANQUILOS CALMEISHON RELAXESHION🗣️🗣️🗣️",
+"​🧠 Procesando... El sistema procesó tu intento y concluyó que: definitivamente esa no era. 🚫 I over-communicate and feel too much 🗣️💗, I just complicate it when I say too much 🙈💭, I laugh about it, dream about that casual touch 🎶✨🤝.", 
+"​🤖 Error 404: Tu contraseña se fue de bares, peleó y perdió las llaves. 🔑🍸 ", 
+"​🔐 Casi, pero no. Un mal decisión más y el sistema se va a poner sentimental. 🍾🚗", 
+"si sigues así se terminará el día mi darling", 
+"​🔐 Código incorrecto: Esta sesión se autodestruirá en 3... 2... 1... (Es broma, solo escribe la clave bien). 💣💥", 
+"​👾 GAME OVER. Te quedaste sin vidas (y sin acceso). Inserta la clave correcta para reintentar. 🎮"
+  
+];
+
+let attempts = 0;
+
+function checkPassword() {
+
+  if (passwordInput.value === PASSWORD) {
+
+    passwordMessage.textContent = "Acceso concedido ✦";
+    passwordMessage.style.color = "#c99cff";
+
+    setTimeout(() => {
+      passwordScreen.style.transition = "opacity 0.8s ease";
+      passwordScreen.style.opacity = "0";
+
+      setTimeout(() => {
+        passwordScreen.style.display = "none";
+      }, 800);
+
+    }, 400);
+
+  } else {
+
+    const randomMessage =
+      wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
+
+    passwordText.textContent = randomMessage;
+
+    passwordMessage.textContent = "Contraseña incorrecta ✦";
+    passwordMessage.style.color = "#ff8ee8";
+
+    passwordInput.value = "";
+
+    passwordInput.animate(
+      [
+        { transform: "translateX(0)" },
+        { transform: "translateX(-8px)" },
+        { transform: "translateX(8px)" },
+        { transform: "translateX(-5px)" },
+        { transform: "translateX(5px)" },
+        { transform: "translateX(0)" }
+      ],
+      {
+        duration: 350
+      }
+    );
+
+    attempts++;
+  }
+}
+
+enterPassword.addEventListener("click", checkPassword);
+
+passwordInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    checkPassword();
+  }
+});
+
+/* =====================================================
+   WEBGL CHECK
+   ===================================================== */
+
+try {
+
+  const test =
+    document.createElement('canvas').getContext('webgl') ||
+    document.createElement('canvas').getContext('experimental-webgl');
+
+  if(!test){
+    throw new Error('Tu navegador no tiene WebGL activo');
+  }
+
+} catch(e){
+
+  showError(
+    'WebGL parece desactivado. Prueba con Chrome/Edge/Firefox, o habilita aceleración por hardware.'
+  );
+
+  return;
+}
+
+
+/* =====================================================
+   THREE.JS GALAXY
+   ===================================================== */
+
+try {
+
+  const canvas =
+    document.getElementById('galaxy-canvas');
+
+  const renderer =
+    new THREE.WebGLRenderer({
+      canvas,
+      antialias:true,
+      alpha:false
+    });
+
+  renderer.setPixelRatio(
+    Math.min(2, window.devicePixelRatio || 1)
+  );
+
+  renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+  );
+
+  renderer.outputEncoding =
+    THREE.sRGBEncoding;
+
+
+  /* ==============================
+     SCENE
+     ============================== */
+
+  const scene =
+    new THREE.Scene();
+
+
+  /* ==============================
+     CAMERA
+     ============================== */
+
+  const camera =
+    new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      2000
+    );
+
+
+  /* ==============================
+     CONTROLS
+     ============================== */
+
+  const controls =
+    new THREE.OrbitControls(
+      camera,
+      renderer.domElement
+    );
+
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+
+  controls.minDistance = 10;
+  controls.maxDistance = 220;
+
+  controls.target.set(0,0,0);
+
+
+  /* ==============================
+     CAMERA DEFAULT
+     ============================== */
+
+  function setCam(){
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    const isMobile =
+      w < 768 || w < h;
+
+    camera.fov =
+      isMobile ? 90 : 75;
+
+    camera.position.set(
+      0,
+      isMobile ? 26 : 22,
+      isMobile ? 110 : 75
+    );
+
+    camera.updateProjectionMatrix();
+
+    controls.update();
+  }
+
+  setCam();
+
+
+  /* =====================================================
+     STARFIELD
+     ===================================================== */
+
+  function makePrettyStarTexture(
+    size = 1024,
+    count = 2000
+  ){
+
+    const c =
+      document.createElement('canvas');
+
+    c.width = c.height = size;
+
+    const g =
+      c.getContext('2d');
+
+
+    const r = size / 2;
+
+
+    /* Fondo */
+
+    const bg =
+      g.createRadialGradient(
+        r,
+        r,
+        r * 0.2,
+        r,
+        r,
+        r
+      );
+
+    bg.addColorStop(
+      0,
+      '#050010'
+    );
+
+    bg.addColorStop(
+      1,
+      '#000000'
+    );
+
+    g.fillStyle = bg;
+
+    g.fillRect(
+      0,
+      0,
+      size,
+      size
+    );
+
+
+    /* Estrellas */
+
+    for(let i = 0; i < count; i++){
+
+      const x =
+        Math.random() * size;
+
+      const y =
+        Math.random() * size;
+
+      const base =
+        Math.random() * 0.7 + 0.3;
+
+
+      const glow =
+        g.createRadialGradient(
+          x,
+          y,
+          0,
+          x,
+          y,
+          Math.random() * 2.2 + 1.6
+        );
+
+
+      const huePick =
+        Math.random();
+
+
+      let colInner =
+        'rgba(255,255,255,' +
+        (0.65 * base) +
+        ')';
+
+
+      let colOuter =
+        'rgba(180,190,255,' +
+        (0.12 * base) +
+        ')';
+
+
+      if(huePick < 0.25){
+
+        colOuter =
+          'rgba(255,180,240,' +
+          (0.12 * base) +
+          ')';
+
+      }
+
+
+      glow.addColorStop(
+        0,
+        colInner
+      );
+
+      glow.addColorStop(
+        1,
+        colOuter
+      );
+
+
+      g.fillStyle = glow;
+
+      g.beginPath();
+
+      g.arc(
+        x,
+        y,
+        Math.random() * 1.2 + 0.6,
+        0,
+        Math.PI * 2
+      );
+
+      g.fill();
+    }
+
+
+    return new THREE.CanvasTexture(c);
+  }
+
+
+  const bgGeo =
+    new THREE.SphereGeometry(
+      600,
+      64,
+      64
+    );
+
+
+  const starTex =
+    makePrettyStarTexture(
+      1024,
+      2600
+    );
+
+
+  starTex.wrapS =
+    starTex.wrapT =
+    THREE.RepeatWrapping;
+
+
+  const bg =
+    new THREE.Mesh(
+      bgGeo,
+      new THREE.MeshBasicMaterial({
+        map:starTex,
+        side:THREE.BackSide,
+        transparent:false,
+        opacity:0.85
+      })
+    );
+
+
+  scene.add(bg);
+
+
+  /* =====================================================
+     GALAXY
+     ===================================================== */
+
+  const galaxy =
+    new THREE.Group();
+
+  scene.add(galaxy);
+
+
+  const phrases = [
+
+    "My Nova ✨",
+    "Akari 💛",
+    "Eres una hermosa estrella",
+    "Tu eres mi más grande aventura🌌",
+    "guardame en tu corazón,ahí estaré siempre",
+    "Hermosa noche por ti, no por las estrellas.♾️",
+    "Feliz cumpleaños",
+    "Piénsame cuando el cielo esté bonito.🥰",
+    "Eli💫",
+    "Gracias por regalarme tu tiempo y felicidad💛",
+    "Mi Canción Favorita 🎶",
+    "Eres mi andromeda 😊",
+    "Tu eres el objeto de mi afecto y mi deseo 👑",
+    "tu y solo tu eres la guardiana de mi corazón",
+    "Eres imperfectamente perfecta",
+    "No necesitas quien te complete🌠",
+    "Solo quien te acepte por completo.",
+    "Mi iris 💛",
+    "Te amo tres millones",
+    "Solo quiero que estés bien y ya",
+    "Por ti, llenaré una ciudad de flores.",
+    "Yo no juzgo lo bueno o malo ¡creo en ti! ",
+    "Simplemente permiteme estar a tu lado",
+    "Eres mi estación de cerezos favorita",
+    "Nunca había conocido alguien como tu ♾️"
+
+  ];
+
+
+  const phraseCount =
+    Math.max(
+      phrases.length * 6,
+      180
+    );
+
+
+  const arms = 5;
+  const radius = 82;
+  const maxH = 22;
+
+
+  /* =====================================================
+     TEXTURE DE FRASES
+     ===================================================== */
+
+  function makeTextTexture(
+    text,
+    size = 48
+  ){
+
+    const c =
+      document.createElement('canvas');
+
+    c.width = 1024;
+    c.height = 128;
+
+
+    const g =
+      c.getContext('2d');
+
+
+    g.clearRect(
+      0,
+      0,
+      c.width,
+      c.height
+    );
+
+
+    g.font =
+      '800 ' +
+      size +
+      'px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial';
+
+
+    g.textAlign =
+      'center';
+
+    g.textBaseline =
+      'middle';
+
+
+    g.shadowColor =
+      'rgba(210,140,255,0.95)';
+
+    g.shadowBlur = 24;
+
+
+    g.fillStyle =
+      'rgba(255,240,255,0.98)';
+
+
+    g.fillText(
+      text,
+      c.width / 2,
+      c.height / 2
+    );
+
+
+    return new THREE.CanvasTexture(c);
+  }
+
+
+  /* =====================================================
+     FRASES
+     ===================================================== */
+
+  for(
+    let i = 0;
+    i < phraseCount;
+    i++
+  ){
+
+    const text =
+      phrases[i % phrases.length];
+
+
+    const tex =
+      makeTextTexture(
+        text,
+        48
+      );
+
+
+    const spr =
+      new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map:tex,
+          transparent:true,
+          depthWrite:false
+        })
+      );
+
+
+    spr.isPhrase = true;
+
+
+    const perArm =
+      phraseCount / arms;
+
+
+    const ang =
+      (i % perArm) *
+      (Math.PI * 2 / perArm);
+
+
+    const armAng =
+      Math.floor(i / perArm) *
+      (Math.PI * 2 / arms);
+
+
+    const dist =
+      Math.pow(
+        i / phraseCount,
+        0.72
+      ) * radius;
+
+
+    const thickness =
+      Math.pow(
+        1 - (dist / radius),
+        2
+      );
+
+
+    const x =
+      Math.cos(
+        ang + armAng
+      ) * dist;
+
+
+    const z =
+      Math.sin(
+        ang + armAng
+      ) * dist;
+
+
+    const y =
+      (Math.random() - 0.5) *
+      maxH *
+      thickness *
+      0.9;
+
+
+    spr.position.set(
+      x,
+      y,
+      z
+    );
+
+
+    spr.scale.set(
+      20,
+      2.6,
+      1
+    );
+
+
+    galaxy.add(spr);
+  }
+
+
+  /* =====================================================
+     GALAXY STARS
+     ===================================================== */
+
+  const starCount = 8000;
+
+  const geom =
+    new THREE.BufferGeometry();
+
+
+  const pos =
+    new Float32Array(
+      starCount * 3
+    );
+
+
+  for(
+    let i = 0;
+    i < starCount;
+    i++
+  ){
+
+    const ang =
+      Math.random() *
+      Math.PI * 2;
+
+
+    const dist =
+      Math.random() *
+      radius *
+      1.15;
+
+
+    const y =
+      (Math.random() - 0.5) *
+      36 *
+      Math.pow(
+        1 -
+        Math.min(
+          dist,
+          radius
+        ) / radius,
+        1.5
+      );
+
+
+    pos[i * 3] =
+      Math.cos(ang) * dist;
+
+
+    pos[i * 3 + 1] =
+      y;
+
+
+    pos[i * 3 + 2] =
+      Math.sin(ang) * dist;
+  }
+
+
+  geom.setAttribute(
+    'position',
+    new THREE.BufferAttribute(
+      pos,
+      3
+    )
+  );
+
+
+  galaxy.add(
+    new THREE.Points(
+      geom,
+      new THREE.PointsMaterial({
+        color:0xffffff,
+        size:0.28,
+        transparent:true,
+        opacity:0.65,
+        blending:
+          THREE.AdditiveBlending
+      })
+    )
+  );
+
+
+  /* =====================================================
+     BLACK HOLE
+     ===================================================== */
+
+  const coreR = 12;
+
+
+  const coreTexCanvas =
+    document.createElement('canvas');
+
+
+  coreTexCanvas.width =
+    coreTexCanvas.height =
+    256;
+
+
+  const cg =
+    coreTexCanvas.getContext('2d');
+
+
+  const grd =
+    cg.createRadialGradient(
+      128,
+      128,
+      10,
+      128,
+      128,
+      128
+    );
+
+
+  grd.addColorStop(
+    0,
+    '#140018'
+  );
+
+  grd.addColorStop(
+    0.6,
+    '#090012'
+  );
+
+  grd.addColorStop(
+    1,
+    '#000'
+  );
+
+
+  cg.fillStyle = grd;
+
+
+  cg.arc(
+    128,
+    128,
+    128,
+    0,
+    Math.PI * 2
+  );
+
+
+  cg.fill();
+
+
+  const core =
+    new THREE.Mesh(
+      new THREE.SphereGeometry(
+        coreR,
+        64,
+        64
+      ),
+      new THREE.MeshBasicMaterial({
+        map:
+          new THREE.CanvasTexture(
+            coreTexCanvas
+          )
+      })
+    );
+
+
+  core.renderOrder = 1;
+
+  scene.add(core);
+
+
+  /* =====================================================
+     PHOTON RING
+     ===================================================== */
+
+  const photonRing =
+    new THREE.Mesh(
+      new THREE.RingGeometry(
+        coreR * 1.05,
+        coreR * 1.18,
+        128
+      ),
+      new THREE.MeshBasicMaterial({
+        color:0xEAAEFF,
+        transparent:true,
+        opacity:0.95,
+        side:THREE.DoubleSide
+      })
+    );
+
+
+  photonRing.rotation.x =
+    -Math.PI / 2;
+
+
+  photonRing.renderOrder =
+    0.5;
+
+
+  scene.add(
+    photonRing
+  );
+
+
+  /* =====================================================
+     HALO
+     ===================================================== */
+
+  function makeHaloTexture(
+    size = 1024,
+    inner = 0.45
+  ){
+
+    const c =
+      document.createElement('canvas');
+
+    c.width =
+      c.height =
+      size;
+
+
+    const g =
+      c.getContext('2d');
+
+
+    const r =
+      size / 2;
+
+
+    const grd =
+      g.createRadialGradient(
+        r,
+        r,
+        r * inner,
+        r,
+        r,
+        r
+      );
+
+
+    grd.addColorStop(
+      0.0,
+      'rgba(255,200,240,0.45)'
+    );
+
+
+    grd.addColorStop(
+      0.35,
+      'rgba(220,180,255,0.35)'
+    );
+
+
+    grd.addColorStop(
+      0.7,
+      'rgba(160,200,255,0.28)'
+    );
+
+
+    grd.addColorStop(
+      1,
+      'rgba(0,0,0,0)'
+    );
+
+
+    g.fillStyle = grd;
+
+
+    g.fillRect(
+      0,
+      0,
+      size,
+      size
+    );
+
+
+    const tex =
+      new THREE.CanvasTexture(c);
+
+
+    tex.needsUpdate = true;
+
+
+    return tex;
+  }
+
+
+  const haloPlane =
+    new THREE.Mesh(
+      new THREE.PlaneGeometry(
+        320,
+        320
+      ),
+      new THREE.MeshBasicMaterial({
+        map:
+          makeHaloTexture(
+            1024,
+            0.45
+          ),
+        transparent:true,
+        depthWrite:false,
+        blending:
+          THREE.AdditiveBlending,
+        opacity:0.9
+      })
+    );
+
+
+  haloPlane.rotation.x =
+    -Math.PI / 2;
+
+
+  haloPlane.renderOrder =
+    0.2;
+
+
+  scene.add(
+    haloPlane
+  );
+
+
+  /* =====================================================
+     ANIMATION
+     ===================================================== */
+
+  let tw = 0;
+
+
+  function animate(){
+
+    requestAnimationFrame(
+      animate
+    );
+
+
+    const t =
+      performance.now() *
+      0.001;
+
+
+    tw =
+      (tw + 0.0003) % 1;
+
+
+    starTex.offset.set(
+      tw,
+      0
+    );
+
+
+    galaxy.rotation.y =
+      t * 0.05;
+
+
+    core.rotation.y =
+      t * 0.12;
+
+
+    photonRing.rotation.z =
+      t * 0.18;
+
+
+    haloPlane.rotation.z =
+      t * 0.02;
+
+
+    controls.update();
+
+
+    renderer.render(
+      scene,
+      camera
+    );
+  }
+
+
+  animate();
+
+
+  /* =====================================================
+     HEARTS OVERLAY
+     ===================================================== */
+
+  const fx =
+    document.getElementById('fx');
+
+
+  const ctx2 =
+    fx.getContext('2d');
+
+
+  function resizeFx(){
+
+    fx.width =
+      Math.floor(
+        innerWidth *
+        Math.min(
+          2,
+          window.devicePixelRatio || 1
+        )
+      );
+
+
+    fx.height =
+      Math.floor(
+        innerHeight *
+        Math.min(
+          2,
+          window.devicePixelRatio || 1
+        )
+      );
+
+
+    fx.style.width =
+      innerWidth + 'px';
+
+
+    fx.style.height =
+      innerHeight + 'px';
+  }
+
+
+  addEventListener(
+    'resize',
+    resizeFx
+  );
+
+
+  resizeFx();
+
+
+  const DPR =
+    Math.min(
+      2,
+      window.devicePixelRatio || 1
+    );
+
+
+  const hearts = [];
+
+
+  function spawnHearts(
+    x,
+    y,
+    n = 20
+  ){
+
+    x *= DPR;
+    y *= DPR;
+
+
+    for(
+      let i = 0;
+      i < n;
+      i++
+    ){
+
+      const a =
+        Math.random() *
+        Math.PI *
+        2;
+
+
+      hearts.push({
+        x,
+        y,
+
+        vx:
+          Math.cos(a) *
+          (
+            0.6 +
+            Math.random() * 0.8
+          ),
+
+        vy:
+          -(
+            0.8 +
+            Math.random() * 1.2
+          ),
+
+        life:1,
+
+        size:
+          10 +
+          Math.random() * 16
+      });
+    }
+  }
+
+
+  function drawHeart(
+    x,
+    y,
+    size
+  ){
+
+    const s = size;
+
+
+    ctx2.save();
+
+
+    ctx2.translate(
+      x,
+      y
+    );
+
+
+    ctx2.beginPath();
+
+
+    ctx2.moveTo(
+      0,
+      -0.25 * s
+    );
+
+
+    ctx2.bezierCurveTo(
+      0.5 * s,
+      -0.9 * s,
+      1.4 * s,
+      -0.1 * s,
+      0,
+      0.9 * s
+    );
+
+
+    ctx2.bezierCurveTo(
+      -1.4 * s,
+      -0.1 * s,
+      -0.5 * s,
+      -0.9 * s,
+      0,
+      -0.25 * s
+    );
+
+
+    const g =
+      ctx2.createRadialGradient(
+        0,
+        0,
+        0,
+        0,
+        0,
+        s
+      );
+
+
+    g.addColorStop(
+      0,
+      'rgba(255,190,220,.95)'
+    );
+
+
+    g.addColorStop(
+      1,
+      'rgba(255,90,160,0)'
+    );
+
+
+    ctx2.fillStyle = g;
+
+
+    ctx2.fill();
+
+
+    ctx2.restore();
+  }
+
+
+  let lastTap = 0;
+
+
+  addEventListener(
+    'click',
+    (e) => {
+
+      const now =
+        performance.now();
+
+
+      if(
+        now - lastTap < 320
+      ){
+
+        spawnHearts(
+          e.clientX,
+          e.clientY,
+          20
+        );
+      }
+
+
+      lastTap = now;
+
+    },
+    {
+      passive:true
+    }
+  );
+
+
+  addEventListener(
+    'touchend',
+    (e) => {
+
+      const now =
+        performance.now();
+
+
+      const t =
+        e.changedTouches &&
+        e.changedTouches[0];
+
+
+      if(
+        now - lastTap < 320 &&
+        t
+      ){
+
+        spawnHearts(
+          t.clientX,
+          t.clientY,
+          20
+        );
+      }
+
+
+      lastTap = now;
+
+    },
+    {
+      passive:true
+    }
+  );
+
+
+  function loopFx(){
+
+    ctx2.clearRect(
+      0,
+      0,
+      fx.width,
+      fx.height
+    );
+
+
+    for(
+      let i = hearts.length - 1;
+      i >= 0;
+      i--
+    ){
+
+      const h =
+        hearts[i];
+
+
+      h.x += h.vx;
+      h.y += h.vy;
+
+      h.vy -= 0.02;
+
+      h.life -= 0.015;
+
+
+      ctx2.globalAlpha =
+        Math.max(
+          0,
+          h.life
+        );
+
+
+      drawHeart(
+        h.x,
+        h.y,
+        h.size
+      );
+
+
+      ctx2.globalAlpha = 1;
+
+
+      if(
+        h.life <= 0
+      ){
+
+        hearts.splice(
+          i,
+          1
+        );
+      }
+    }
+
+
+    requestAnimationFrame(
+      loopFx
+    );
+  }
+
+
+  loopFx();
+
+
+} catch(e){
+
+  showError(
+    'Error cargando la galaxia: ' +
+    e.message
+  );
+
+  console.error(e);
+}
+
+})();
+</script>
+
+</body>
+</html>
